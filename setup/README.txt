@@ -71,5 +71,7 @@ kubectl delete -f frontend-service.yaml
 kubectl delete -f frontend-ingress.yaml
 ```
 
+Git repo: https://github.com/dbd311/multi-cloud-platform
+git clone git@github.com:dbd311/multi-cloud-platform.git
 
 
