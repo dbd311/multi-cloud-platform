@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-backend
+  template:
+    metadata:
+      labels:
+        app: nginx-backend
+    spec:
+      containers:
+        - name: backend
+          image: gcr.io/multi-cloud-platform/nginx-backend:v1.0.0
+          ports:
+            - containerPort: 5000
+          env:
+            - name: SQLALCHEMY_DATABASE_URI
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets
+                  key: DATABASE_URI
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gcp-secrets
+                  key: JWT_SECRET_KEY
+          volumeMounts:
+            - name: gcp-secrets-store
+              mountPath: /mnt/secrets
+              readOnly: true
+      volumes:
+        - name: gcp-secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: gcp-secrets

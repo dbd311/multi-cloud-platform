@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: ClusterIP  # Explicitly set the type as clusterIP, default type of a Kubernetes service
+  selector:
+    app: nginx-backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
