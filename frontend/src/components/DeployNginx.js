@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import CloudProviderSelect from './CloudProviderSelect';
-import DomainInput from './DomainInput';
+import Settings from './Settings';
 import DeploymentStatus from './DeploymentStatus';
 
 function DeployNginx() {
@@ -20,7 +20,7 @@ function DeployNginx() {
   // Handle login
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/login', {
+      const response = await axios.post('http://backend.multicloudplatform.com:5000/login', {
         username,
         password,
       });
@@ -48,14 +48,14 @@ function DeployNginx() {
   // Handle deployment (for developers)
   const handleDeploy = async () => {
     if (!domainRegex.test(domain)) {
-      setError('Please enter a valid domain name, e.g. example.com example123.ch etc.');
+      setError('Please enter a valid domain name, e.g. example.com etc.');
       return;
     }
 
     setError(''); // Clear any previous errors
 
     try {
-      const response = await axios.post('http://localhost:5000/deploy', {
+      const response = await axios.post('http://backend.multicloudplatform.com:5000/deploy', {
         cloud_provider: cloudProvider,
         domain: domain,
       });

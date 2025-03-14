@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  IMAGE_NAME: "gcr.io/multi-cloud-platform/nginx-backend"
+  IMAGE_TAG: "v1.0.0"

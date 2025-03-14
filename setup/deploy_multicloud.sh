@@ -4,6 +4,8 @@
 
 set -euo pipefail
 
+source ./functions.sh
+
 # Check required arguments 
 if [ $# -ne 3 ]; then
   echo "Usage: $0 <BACK_END_VERSION> <FRONT_END_VERSION> <PROJECT_DIR>"
@@ -14,9 +16,15 @@ BACK_END_VERSION=$1 # v1.0.0
 FRONT_END_VERSION=$2 # v1.2.3
 PROJECT_DIR=$3 # ~/workspace/multi-cloud-multi-tenant
 
+
 # Navigate to the setup directory
 if ! cd "$PROJECT_DIR/setup"; then
   echo "Failed to navigate to $PROJECT_DIR/setup"
+  exit 1
+fi
+
+if ! docker info > /dev/null 2>&1; then
+  echo "Docker is not running"
   exit 1
 fi
 
@@ -107,17 +115,73 @@ deploy_component() {
   local component=$1
 
   echo "Deploying the $component..."
-  for file in "$component-deployment.yaml" "$component-service.yaml" "$component-ingress.yaml"; do
+  for file in "$component-configMap.yaml" "$component-deployment.yaml" "$component-service.yaml" "$component-ingress.yaml"; do
     if [ -f "$file" ]; then
       kubectl apply -f "$file" || { echo "$component deployment failed"; exit 1; }
     fi
   done
 }
 
+# Create DNS record for backend if it does not exist
+# gcloud dns managed-zones list
+
+create_backend_dns_record(){
+  BACKEND_IP=$(kubectl get svc backend-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  MANAGED_ZONE="backend-zone"
+  DNS_NAME="api.${DOMAIN_NAME}."
+  DNS_TYPE="A"
+  DNS_TTL="300"
+
+  # Step 1: Check if the managed zone exists
+  echo "Checking if managed zone '$MANAGED_ZONE' exists..."
+  EXISTING_ZONE=$(gcloud dns managed-zones list --filter="name=$MANAGED_ZONE" --format="value(name)")
+
+  if [[ -z "$EXISTING_ZONE" ]]; then
+    echo "Managed zone '$MANAGED_ZONE' does not exist. Creating it..."
+    gcloud dns managed-zones create "$MANAGED_ZONE" \
+      --dns-name="$DNS_NAME" \
+      --description="Managed zone for backend services" \
+      --visibility="public" \
+      --project="$PROJECT_ID"
+    echo "Managed zone '$MANAGED_ZONE' created."
+  else
+    echo "Managed zone '$MANAGED_ZONE' already exists."
+  fi
+
+  # Step 2: Check if the DNS record exists
+  echo "Checking if DNS record '$DNS_NAME' exists..."
+  EXISTING_RECORD=$(gcloud dns record-sets list --zone="$MANAGED_ZONE" --name="$DNS_NAME" --type="$DNS_TYPE" --format="value(name)")
+
+  if [[ -n "$EXISTING_RECORD" ]]; then
+    echo "DNS record '$DNS_NAME' exists. Deleting it..."
+    gcloud dns record-sets delete "$DNS_NAME" \
+      --zone="$MANAGED_ZONE" \
+      --type="$DNS_TYPE" \
+      --project="$PROJECT_ID"
+    echo "DNS record '$DNS_NAME' deleted."
+  else
+    echo "DNS record '$DNS_NAME' does not exist."
+  fi
+
+  # Step 3: Create the DNS record
+  echo "Creating DNS record '$DNS_NAME'..."
+  gcloud dns record-sets create "$DNS_NAME" \
+    --zone="$MANAGED_ZONE" \
+    --type="$DNS_TYPE" \
+    --ttl="$DNS_TTL" \
+    --rrdatas="$DNS_DATA" \
+    --project="$PROJECT_ID"
+  echo "DNS record '$DNS_NAME' created."
+}
+
 # Wait for a few minutes until DB setup successfully done and docker images are available in the image registry
-Sleep 180
+#Sleep 180
+
 
 deploy_component "backend"
+kubectl wait --for=condition=available --timeout=300s deployment/backend-service
+
+create_backend_dns_record
 deploy_component "frontend"
 
 echo "Deployment completed successfully!"

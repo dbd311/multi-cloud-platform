@@ -24,3 +24,20 @@ Main component:
   App.js: Renders the DeployNginx component.
 
 index.js: Entry point of the application.
+
+When compile the frontend using npm run build, React will generate the following structure:
+
+#build/
+#    ├── index.html
+#    ├── static/
+#    │   ├── js/
+#    │   │   └── main.[hash].js
+#    │   ├── css/
+#    │   │   └── main.[hash].css
+#    └── assets/
+#
+
+# then we need to copy the build folder to nginx share folder
+COPY --from=build /app/build /usr/share/nginx/html
+
+

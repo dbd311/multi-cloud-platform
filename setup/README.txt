@@ -18,7 +18,8 @@ Also, make sure:
 - Your GCP project and credentials are configured (`gcloud auth login` and `gcloud config set project <YOUR_PROJECT_ID>`).
 
 ## Usage
-
+# Update the env vars accordingly
+vi env_vars.sh
 ```bash
 ./deploy_multicloud.sh <BACK_END_VERSION> <FRONT_END_VERSION> <PROJECT_DIR>
 ```

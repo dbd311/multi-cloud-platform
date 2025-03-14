@@ -35,7 +35,7 @@ function Settings({ value, onChange, error, setError }) {
         type="text"
         id="namespace"
         value={value}        
-        placeholder="Enter a valid namespace"
+        placeholder="Enter a valid namespace e.g. awscloud"
         style={{ border: error ? '1px solid red' : '1px solid #ccc' }}
       />
     </div>
@@ -45,7 +45,7 @@ function Settings({ value, onChange, error, setError }) {
         type="text"
         id="appname"
         value={value}        
-        placeholder="Enter a valid app name"
+        placeholder="Enter a valid app name, e.g. nginx-12345"
         style={{ border: error ? '1px solid red' : '1px solid #ccc' }}
       />
     </div>

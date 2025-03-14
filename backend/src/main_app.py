@@ -11,6 +11,7 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
 
+# organize the application into modular components.
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(deployment_bp, url_prefix='/deployment')
 
