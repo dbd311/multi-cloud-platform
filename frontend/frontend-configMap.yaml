@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: frontend-config
-data:
-  IMAGE_NAME: "gcr.io/multi-cloud-platform/nginx-frontend"
-  IMAGE_TAG: "v1.0.0"

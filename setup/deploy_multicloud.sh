@@ -7,8 +7,8 @@ set -euo pipefail
 source ./functions.sh
 
 # Check required arguments 
-if [ $# -ne 3 ]; then
-  echo "Usage: $0 <BACK_END_VERSION> <FRONT_END_VERSION> <PROJECT_DIR>"
+if [ $# -ne 5 ]; then
+  echo "Usage: $0 <BACK_END_VERSION> <FRONT_END_VERSION> <PROJECT_DIR> <BACKEND_RELEASE_URL> <FRONTEND_RELEASE_URL>"
   exit 1
 fi
 
@@ -16,6 +16,8 @@ BACK_END_VERSION=$1 # v1.0.0
 FRONT_END_VERSION=$2 # v1.2.3
 PROJECT_DIR=$3 # ~/workspace/multi-cloud-multi-tenant
 
+BACK_END_RELEASE=$4 # e.g. https://github.com/dbd311/backend-multicloud/archive/refs/tags/v1.0.0.zip
+FRONT_END_RELEASE=$5 # e.g. https://github.com/dbd311/frontend-multicloud/archive/refs/tags/v1.0.0.zip
 
 # Navigate to the setup directory
 if ! cd "$PROJECT_DIR/setup"; then
@@ -78,37 +80,76 @@ if ! gcloud auth configure-docker; then
 fi
 
 # Helper function to build and push Docker images
+#!/bin/bash
+
+# Function to build and push Docker images
 build_and_push() {
-  local component=$1
-  local version=$2
-  local dir=$3
+  local component=$1  # e.g., frontend
+  local version=$2   # e.g., 1.0.0
+  local release=$3    # e.g., https://github.com/dbd311/frontend-multicloud/archive/refs/tags/v1.0.0.zip
 
   echo "Building and pushing the $component Docker image..."
-  if ! cd "$PROJECT_DIR/$dir"; then
-    echo "Failed to navigate to $PROJECT_DIR/$dir"
+
+  # Navigate to the project directory
+  if ! cd "$PROJECT_DIR"; then
+    echo "Failed to navigate to $PROJECT_DIR"
     exit 1
   fi
 
+  # Download the release
+  echo "Downloading repository..."
+  if ! wget -q "$release"; then
+    echo "Failed to download the release from $release"
+    exit 1
+  fi
+
+  # Extract the release zip file
+  local zip_file=$(basename "$release")
+  local extract_dir="${component}-${version}"
+
+  echo "Unzipping $zip_file..."
+  if ! unzip -q "$zip_file" -d "$extract_dir"; then
+    echo "Failed to unzip $zip_file"
+    exit 1
+  fi
+
+  # Navigate to the extracted directory
+  if ! cd "$extract_dir"/*; then
+    echo "Failed to navigate to the extracted directory"
+    exit 1
+  fi
+
+  # Build the Docker image
+  echo "Building Docker image for $component..."
   if ! docker build -t "$component:$version" .; then
     echo "$component Docker build failed"
     exit 1
   fi
 
-  project_id=$(gcloud config get-value project)
+  # Tag the Docker image
+  local project_id=$(gcloud config get-value project)
+  echo "Tagging Docker image for $component..."
   if ! docker tag "$component:$version" "gcr.io/${project_id}/$component:$version"; then
     echo "$component Docker tag failed"
     exit 1
   fi
 
+  # Push the Docker image
+  echo "Pushing Docker image for $component..."
   if ! docker push "gcr.io/${project_id}/$component:$version"; then
     echo "$component Docker push failed"
     exit 1
   fi
+
+  # Clean up
+  echo "Cleaning up..."
+  cd "$PROJECT_DIR"
+  rm -rf "$zip_file" "$extract_dir"
 }
 
 # Build and push backend and frontend images
-build_and_push "nginx-backend" "$BACK_END_VERSION" "backend"
-build_and_push "nginx-frontend" "$FRONT_END_VERSION" "frontend"
+build_and_push "nginx-backend" "$BACK_END_VERSION" "backend" "$BACK_END_RELEASE" 
+build_and_push "nginx-frontend" "$FRONT_END_VERSION" "frontend" "$FRONT_END_RELEASE" 
 
 # Deploy to Kubernetes
 deploy_component() {
