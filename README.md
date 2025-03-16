@@ -38,7 +38,7 @@ Also, make sure:
 ## Usage
 
 ```bash
-./deploy_multicloud.sh <BACK_END_VERSION> <FRONT_END_VERSION> <PROJECT_DIR>
+./deploy_multicloud.sh <BACK_END_VERSION> <FRONT_END_VERSION> <PROJECT_DIR> <BACKEND_RELEASE_URL> <FRONTEND_RELEASE_URL>
 ```
 
 **Arguments:**
@@ -46,6 +46,8 @@ Also, make sure:
 - `BACK_END_VERSION` — The version of the backend Docker image (e.g., `v1.0.0`)
 - `FRONT_END_VERSION` — The version of the frontend Docker image (e.g., `v1.2.3`)
 - `PROJECT_DIR` — The root directory of the project (e.g., `~/workspace/multi-cloud-multi-tenant`)
+- `BACKEND_RELEASE_URL` — The release URL of the backend 
+- `FRONTEND_RELEASE_URL` — The release URL of the frontend
 
 ## What the Script Does
 
@@ -67,7 +69,7 @@ Also, make sure:
 ## Example
 
 ```bash
-./deploy_multicloud.sh v1.0.0 v1.2.3 ~/workspace/multi-cloud-multi-tenant
+./deploy_multicloud.sh v1.0.0 v1.2.3 ~/workspace/multi-cloud-multi-tenant https://github.com/dbd311/backend-multicloud/archive/refs/tags/v1.0.0.zip https://github.com/dbd311/frontend-multicloud/archive/refs/tags/v1.0.0.zip 
 ```
 
 ## Troubleshooting
