@@ -17,11 +17,16 @@ Also, make sure:
 - You have access to a Kubernetes cluster.
 - Your GCP project and credentials are configured (`gcloud auth login` and `gcloud config set project <YOUR_PROJECT_ID>`).
 
+## Download git repository
+Git repo URL: https://github.com/dbd311/multi-cloud-platform
+git clone git@github.com:dbd311/multi-cloud-platform.git
+cd multi-cloud-platform/setup
+
 ## Usage
 # Update the env vars accordingly
 vi env_vars.sh
 ```bash
-./deploy_multicloud.sh <BACK_END_VERSION> <FRONT_END_VERSION> <PROJECT_DIR>
+./deploy_multicloud.sh <BACK_END_VERSION> <FRONT_END_VERSION> <PROJECT_DIR> <BACKEND_RELEASE_URL> <FRONTEND_RELEASE_URL>
 ```
 
 **Arguments:**
@@ -29,6 +34,8 @@ vi env_vars.sh
 - `BACK_END_VERSION` — The version of the backend Docker image (e.g., `v1.0.0`)
 - `FRONT_END_VERSION` — The version of the frontend Docker image (e.g., `v1.2.3`)
 - `PROJECT_DIR` — The root directory of the project (e.g., `~/workspace/multi-cloud-multi-tenant`)
+- `BACKEND_RELEASE_URL` — The release URL of the backend 
+- `FRONTEND_RELEASE_URL` — The release URL of the frontend
 
 ## What the Script Does
 
@@ -50,7 +57,7 @@ vi env_vars.sh
 ## Example
 
 ```bash
-./deploy_multicloud.sh v1.0.0 v1.2.3 ~/workspace/multi-cloud-multi-tenant
+./deploy_multicloud.sh v1.0.0 v1.2.3 ~/workspace/multi-cloud-multi-tenant https://github.com/dbd311/backend-multicloud/archive/refs/tags/v1.0.0.zip https://github.com/dbd311/frontend-multicloud/archive/refs/tags/v1.0.0.zip 
 ```
 
 ## Troubleshooting
@@ -70,8 +77,5 @@ kubectl delete -f frontend-deployment.yaml
 kubectl delete -f frontend-service.yaml
 kubectl delete -f frontend-ingress.yaml
 ```
-
-Git repo: https://github.com/dbd311/multi-cloud-platform
-git clone git@github.com:dbd311/multi-cloud-platform.git
 
 

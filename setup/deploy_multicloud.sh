@@ -43,7 +43,7 @@ kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/secrets-s
 
 # Create SecretProviderClass
 echo "Creating SecretProviderClass..."
-kubectl apply -f gcp-secret-provider-class.yaml
+kubectl apply -f ../gcp-secret-provider-class.yaml
 
 # Verify provisioned pods
 echo "Verifying provisioned pods..."
