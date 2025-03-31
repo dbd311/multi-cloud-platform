@@ -90,5 +90,71 @@ kubectl delete -f frontend-service.yaml
 kubectl delete -f frontend-ingress.yaml
 ```
 
+## Install Minikube and its dependencies on Windows 10:
 
+Open PowerShell as Administrator and run to enable HyperV:
+
+    Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+
+    Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All
+
+
+Install Chocolatey (Package Manager for Windows)    
+
+    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+    choco --version
+
+Install kubectl (Kubernetes CLI)
+
+    choco install kubernetes-cli
+
+    kubectl version --client
+
+Install Minikube
+
+    choco install minikube
+
+    minikube version
+
+Start Minikube
+
+Launch PowerShell (Admin) and run:
+
+    minikube start --driver=hyperv
+
+(If using VirtualBox, replace hyperv with virtualbox.)
+
+
+Verify Installation
+
+    minikube status
+
+    kubectl get nodes
+
+    minikube dashboard
+
+Troubleshooting
+
+Delete and recreate the K82 cluster again
+
+    minikube delete && minikube start --driver=hyperv
+
+Allocate more CPU and RAM
+
+    minikube config set cpus 4
+    
+    minikube config set memory 8192
+
+Alternative: Start minikube with Docker Desktop
+
+    minikube start --driver=docker
+
+Check minikube and kubectl version
+
+    minikube version
+
+    kubectl version --client
+
+    
 
