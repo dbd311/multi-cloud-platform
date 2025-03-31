@@ -158,3 +158,6 @@ Check minikube and kubectl version
 
     
 
+## Tutorial
+
+   https://www.youtube.com/watch?v=X48VuDVv0do
