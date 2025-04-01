@@ -7,22 +7,16 @@ project_exists() {
     gcloud projects list --filter="projectId=${PROJECT_ID}" --format="value(projectId)" | grep -q "^${PROJECT_ID}$"
 }
 
-# Check if the project already exists
-if project_exists; then
-    echo "Project '${PROJECT_ID}' already exists."
+# Check if project exists
+if gcloud projects list --filter="projectId=${PROJECT_ID}" --format="value(projectId)" | grep -q "${PROJECT_ID}"; then
+  echo "Project ${PROJECT_ID} already exists."
 else
-    echo "Project '${PROJECT_ID}' does not exist. Creating a new project..."
-
-    # Create the new project
-    gcloud projects create "${PROJECT_ID}" --name="${PROJECT_NAME}" --billing-account="${BILLING_ACCOUNT}"
-
-    # Check if the project creation was successful
-    if [ $? -eq 0 ]; then
-        echo "Project '${PROJECT_ID}' created successfully."
-    else
-        echo "Failed to create project '${PROJECT_ID}'. Exiting."
-        exit 1
-    fi
+  echo "Creating project ${PROJECT_ID}..."
+  gcloud projects create "${PROJECT_ID}" --name="${PROJECT_NAME}"
+  
+  # Link billing account separately
+  echo "Linking billing account..."
+  gcloud beta billing projects link "${PROJECT_ID}" --billing-account="${BILLING_ACCOUNT}"
 fi
 
 # Set the newly created project as the active project
